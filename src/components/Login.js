@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Container, TextField, Button, Typography, Box, Link } from '@mui/material';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -6,29 +7,54 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle login logic here
-        console.log({ email, password });
+        console.log({ email, password }); // Handle login logic here
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h2>Login</h2>
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-            />
-            <button type="submit">Login</button>
-        </form>
+        <Container maxWidth="xs">
+            <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh">
+                <Typography variant="h4" component="h1" gutterBottom>
+                    Login
+                </Typography>
+                <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+                    <TextField
+                        label="Email"
+                        type="email"
+                        fullWidth
+                        margin="normal"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                    <TextField
+                        label="Password"
+                        type="password"
+                        fullWidth
+                        margin="normal"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        style={{ marginTop: '16px' }}
+                    >
+                        Login
+                    </Button>
+                </form>
+                {/* Forgot Password Link */}
+                <Link href="#" variant="body2" style={{ marginTop: '16px' }}>
+                    Forgot Password?
+                </Link>
+                {/* New User Register Link */}
+                <Link href="/register" variant="body2" style={{ marginTop: '8px' }}>
+                    New User? Register
+                </Link>
+            </Box>
+        </Container>
     );
 };
 
