@@ -19,6 +19,7 @@ import config from '../config';
 
 const PostComponent = ({ post }) => {
     const [email, setEmail] = useState('');
+    const [name,setName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [comments, setComments] = useState([]); // State for comments
@@ -35,6 +36,8 @@ const PostComponent = ({ post }) => {
                 setProfilePhoto(data.profilePhotoUrl);
                 setWhatsapp(data.whatsappNumber);
                 setEmail(data.email);
+                setName(data.name);
+
             } catch (error) {
                 console.error('Error fetching user:', error);
             }
@@ -56,7 +59,7 @@ const PostComponent = ({ post }) => {
 
     const settings = {
         dots: true,
-        infinite: true,
+        infinite: post.imageUrls.length > 1,
         speed: 500,
         slidesToShow: 1,
         slidesToScroll: 1,
@@ -74,13 +77,13 @@ const PostComponent = ({ post }) => {
     };
 
     const isSmallScreen = useMediaQuery('(max-width:600px)');
-
+    console.log(post.imageUrls);
     return (
         <Card sx={{ margin: '20px 0', padding: '20px', ...postTypeStyles[post.postType] }}>
             {/* User Info */}
             <Box display="flex" alignItems="center" mb={2}>
                 <Avatar alt="User Avatar" src={profilePhoto} sx={{ width: 56, height: 56 }} />
-                <Typography variant="h6" ml={2}>{post.userName}</Typography>
+                <Typography variant="h6" ml={2}>{name}</Typography>
             </Box>
 
             {/* Post Info */}
@@ -97,6 +100,7 @@ const PostComponent = ({ post }) => {
                 <Typography variant="body1" mt={1}>{post.description}</Typography>
 
                 {/* Image Carousel */}
+               
                 {post.imageUrls && post.imageUrls.length > 0 && (
                     <Box mt={2}>
                         <Slider {...settings}>
