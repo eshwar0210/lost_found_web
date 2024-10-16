@@ -1,13 +1,62 @@
-import React, { useState } from 'react';
-import { Container, TextField, Button, Typography, Box, Link } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Container, TextField, Button, Typography, Box, Link, Snackbar, Alert } from '@mui/material';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'; // Import Firebase authentication methods
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('');
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    // Check for token in local storage on component mount
+    useEffect(() => {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            navigate('/home'); // Redirect to home if token exists
+        }
+    }, [navigate]); // Dependency array includes navigate to avoid stale closures
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log({ email, password }); // Handle login logic here
+
+        const auth = getAuth(); // Initialize Firebase Auth
+
+        try {
+            // Sign in the user with email and password
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Check if the user's email is verified
+            if (!user.emailVerified) {
+                setSnackbarMessage('Please verify your email before logging in.');
+                setSnackbarSeverity('warning');
+                setSnackbarOpen(true);
+                return; // Exit the function if the email is not verified
+            }
+
+            // Save user info or token to local storage for session management
+            localStorage.setItem('authToken', user.accessToken);
+            localStorage.setItem('uid',user.uid);
+            // Provide success feedback
+            setSnackbarMessage('Login successful!');
+            setSnackbarSeverity('success');
+            setSnackbarOpen(true);
+
+            // Redirect to home page after successful login
+            navigate('/home');
+        } catch (error) {
+            // Handle login errors
+            setSnackbarMessage(error.message);
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     return (
@@ -53,6 +102,13 @@ const Login = () => {
                 <Link href="/register" variant="body2" style={{ marginTop: '8px' }}>
                     New User? Register
                 </Link>
+
+                {/* Snackbar for feedback */}
+                <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+                    <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity}>
+                        {snackbarMessage}
+                    </Alert>
+                </Snackbar>
             </Box>
         </Container>
     );
