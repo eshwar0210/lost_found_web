@@ -14,8 +14,10 @@ import {
     FormControl,
     InputLabel,
     IconButton,
-    TextField
+    TextField,
+    Snackbar,
 } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Header from './Header';
@@ -29,6 +31,9 @@ const Home = () => {
     const [description, setDescription] = useState('');
     const [images, setImages] = useState([]); // Array for storing uploaded images
     const [posts, setPosts] = useState([]); // State to store all posts
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [loading, setLoading] = useState(false); // Loading state
     const uid = localStorage.getItem('uid');
 
     // Handle dialog open
@@ -59,6 +64,7 @@ const Home = () => {
 
     // Handle form submission
     const handleSubmit = async () => {
+        setLoading(true); // Set loading to true
         const formData = new FormData();
         formData.append('location', location);
         formData.append('postType', postType);
@@ -75,15 +81,18 @@ const Home = () => {
             });
 
             if (response.ok) {
-                console.log('Post created successfully');
-                handleClose(); // Close the dialog after submission
                 const newPost = await response.json();
                 setPosts([newPost.post, ...posts]); // Add new post to the top
+                setSnackbarMessage('Post created successfully!');
+                handleClose(); // Close the dialog after submission
             } else {
-                console.error('Error creating post:', response.statusText);
+                setSnackbarMessage('Error creating post: ' + response.statusText);
             }
         } catch (error) {
-            console.error('Error uploading images or creating post:', error);
+            setSnackbarMessage('Error uploading images or creating post: ' + error.message);
+        } finally {
+            setLoading(false); // Set loading to false
+            setSnackbarOpen(true); // Open Snackbar
         }
     };
 
@@ -195,54 +204,62 @@ const Home = () => {
                                         onChange={handleImageUpload}
                                     />
                                 </Button>
-                            </Box>
-
-                            {/* Preview of uploaded images */}
-                            {images.length > 0 && (
-                                <Box mt={2} display="flex" flexWrap="wrap" gap={2}>
-                                    {images.map((img, index) => (
-                                        <Box key={index} position="relative" display="inline-block">
+                                <Box mt={1} display="flex" flexWrap="wrap">
+                                    {images.map((image, index) => (
+                                        <Box
+                                            key={index}
+                                            sx={{ position: 'relative', marginRight: 1, marginBottom: 1 }}
+                                        >
                                             <img
-                                                src={URL.createObjectURL(img)}
-                                                alt={`upload-${index}`}
-                                                width="100"
-                                                height="100"
-                                                style={{ borderRadius: '8px', objectFit: 'cover' }}
+                                                src={URL.createObjectURL(image)}
+                                                alt={`Uploaded ${index}`}
+                                                style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '5px' }}
                                             />
                                             <IconButton
-                                                size="small"
-                                                sx={{
-                                                    position: 'absolute',
-                                                    top: '-5px',
-                                                    right: '-5px',
-                                                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                                                }}
+                                                sx={{ position: 'absolute', top: 0, right: 0 }}
                                                 onClick={() => handleRemoveImage(index)}
                                             >
-                                                <DeleteIcon sx={{ color: '#fff' }} />
+                                                <DeleteIcon />
                                             </IconButton>
                                         </Box>
                                     ))}
                                 </Box>
-                            )}
+                            </Box>
                         </DialogContent>
                         <DialogActions>
                             <Button onClick={handleClose} color="primary">
                                 Cancel
                             </Button>
-                            <Button onClick={handleSubmit} color="primary" variant="contained">
-                                Post
+                            <Button
+                                onClick={handleSubmit}
+                                color="primary"
+                                variant="contained"
+                                disabled={loading} // Disable button while loading
+                            >
+                                {loading ? 'Posting...' : 'Post'} 
+                                
                             </Button>
                         </DialogActions>
                     </Dialog>
-
-                    {/* Display posts */}
-                    <Box mt={3}>
-                        {posts.map((post) => (
-                            <PostComponent key={post._id} post={post} />
-                        ))}
-                    </Box>
                 </Box>
+
+                {/* Display posts */}
+                <Box mt={3}>
+                    {posts.map((post) => (
+                        <PostComponent key={post._id} post={post} />
+                    ))}
+                </Box>
+
+                {/* Snackbar for notifications */}
+                <Snackbar
+                    open={snackbarOpen}
+                    autoHideDuration={6000}
+                    onClose={() => setSnackbarOpen(false)}
+                >
+                    <MuiAlert onClose={() => setSnackbarOpen(false)} severity={loading ? 'info' : 'success'}>
+                        {snackbarMessage}
+                    </MuiAlert>
+                </Snackbar>
             </Container>
         </>
     );
