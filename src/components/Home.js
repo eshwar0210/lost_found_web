@@ -1,71 +1,250 @@
-import React, { useState } from 'react';
-import { Box, IconButton, Menu, MenuItem, Typography, Container } from '@mui/material';
-import AccountCircle from '@mui/icons-material/AccountCircleOutlined';
-
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import {
+    Box,
+    Container,
+    Avatar,
+    Typography,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
+    IconButton,
+    TextField
+} from '@mui/material';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
+import DeleteIcon from '@mui/icons-material/Delete';
+import Header from './Header';
+import config from '../config';
+import PostComponent from './Postcomponent'; // Import PostComponent
 
 const Home = () => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const navigate = useNavigate();
+    const [open, setOpen] = useState(false); // Dialog open/close state
+    const [location, setLocation] = useState('');
+    const [postType, setPostType] = useState('lost');
+    const [description, setDescription] = useState('');
+    const [images, setImages] = useState([]); // Array for storing uploaded images
+    const [posts, setPosts] = useState([]); // State to store all posts
+    const uid = localStorage.getItem('uid');
 
-    // Handle menu open
-    const handleMenuOpen = (event) => {
-        setAnchorEl(event.currentTarget);
+    // Handle dialog open
+    const handleClickOpen = () => setOpen(true);
+
+    // Handle dialog close
+    const handleClose = () => {
+        setOpen(false);
+        setDescription('');
+        setLocation('');
+        setImages([]);
     };
 
-    // Handle menu close
-    const handleMenuClose = () => {
-        setAnchorEl(null);
+    // Fetch posts from backend
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const response = await fetch(`${config.BASE_URL}/post/`);
+                const data = await response.json();
+                setPosts(data);
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
+        };
+
+        fetchPosts();
+    }, []);
+
+    // Handle form submission
+    const handleSubmit = async () => {
+        const formData = new FormData();
+        formData.append('location', location);
+        formData.append('postType', postType);
+        formData.append('description', description);
+        formData.append('uid', uid);
+
+        // Append images to FormData
+        images.forEach((image) => formData.append('images', image));
+
+        try {
+            const response = await fetch(`${config.BASE_URL}/post/`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                console.log('Post created successfully');
+                handleClose(); // Close the dialog after submission
+                const newPost = await response.json();
+                setPosts([newPost.post, ...posts]); // Add new post to the top
+            } else {
+                console.error('Error creating post:', response.statusText);
+            }
+        } catch (error) {
+            console.error('Error uploading images or creating post:', error);
+        }
     };
 
-    // Handle logout
-    const handleLogout = () => {
-        // Clear localStorage tokens
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('uid');
-        
-        // Close the menu and redirect to login page
-        setAnchorEl(null);
-        navigate('/login');
+    // Handle image upload
+    const handleImageUpload = (event) => {
+        const files = Array.from(event.target.files);
+        setImages((prevImages) => [...prevImages, ...files]);
     };
 
-    // Handle Edit Profile (We will implement this later)
-    const handleEditProfile = () => {
-        setAnchorEl(null);
-        // Navigate to Edit Profile page (to be implemented later)
-        navigate('/profile');
+    // Handle removing an image
+    const handleRemoveImage = (index) => {
+        setImages((prevImages) => prevImages.filter((_, i) => i !== index));
     };
 
     return (
-        <Container>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mt={3}>
-                <Typography variant="h5">Welcome to the Home Page</Typography>
+        <>
+            <Header />
+            <Container>
+                <Box sx={{ backgroundColor: '#f5f5f5' }}>
+                    {/* Create Post Box */}
+                    <Box
+                        mt={3}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        sx={{
+                            backgroundColor: '#fff',
+                            borderRadius: '10px',
+                            padding: '10px',
+                            boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.1)',
+                        }}
+                    >
+                        <Avatar
+                            alt="User"
+                            src="/static/images/avatar/1.jpg"
+                            sx={{ width: 56, height: 56, marginRight: 2 }}
+                        />
+                        <Box
+                            sx={{
+                                backgroundColor: '#f0f0f0',
+                                padding: '12px 20px',
+                                borderRadius: '20px',
+                                flexGrow: 1,
+                                cursor: 'pointer',
+                                '&:hover': {
+                                    backgroundColor: '#e0e0e0',
+                                },
+                            }}
+                            onClick={handleClickOpen}
+                        >
+                            <Typography variant="body1" color="textSecondary">
+                                Create a new post...
+                            </Typography>
+                        </Box>
+                    </Box>
 
-                {/* Account Circle Icon for Profile/Logout */}
-                <IconButton onClick={handleMenuOpen} size="large" edge="end" aria-label="account of current user" aria-controls="menu-appbar" aria-haspopup="true" color="inherit">
-                    <AccountCircle style={{ fontSize: 40 }} />
-                </IconButton>
+                    {/* Dialog for creating post */}
+                    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+                        <DialogTitle>Create a Post</DialogTitle>
+                        <DialogContent>
+                            <FormControl fullWidth margin="dense" variant="outlined">
+                                <InputLabel id="post-type-label">Type</InputLabel>
+                                <Select
+                                    labelId="post-type-label"
+                                    value={postType}
+                                    onChange={(e) => setPostType(e.target.value)}
+                                    label="Type"
+                                >
+                                    <MenuItem value="lost">Lost</MenuItem>
+                                    <MenuItem value="found">Found</MenuItem>
+                                </Select>
+                            </FormControl>
 
-                {/* Dropdown Menu for Profile and Logout */}
-                <Menu
-                    id="menu-appbar"
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={handleMenuClose}
-                    anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                    transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                    }}
-                >
-                    <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
-                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                </Menu>
-            </Box>
-        </Container>
+                            <TextField
+                                margin="dense"
+                                label="Location"
+                                type="text"
+                                fullWidth
+                                variant="outlined"
+                                value={location}
+                                onChange={(e) => setLocation(e.target.value)}
+                            />
+
+                            <TextField
+                                margin="dense"
+                                label="Description (optional)"
+                                type="text"
+                                fullWidth
+                                multiline
+                                rows={4}
+                                variant="outlined"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                            />
+
+                            {/* Image upload */}
+                            <Box mt={2}>
+                                <Button
+                                    variant="contained"
+                                    component="label"
+                                    startIcon={<PhotoCamera />}
+                                >
+                                    Upload Images
+                                    <input
+                                        hidden
+                                        accept="image/*"
+                                        type="file"
+                                        multiple
+                                        onChange={handleImageUpload}
+                                    />
+                                </Button>
+                            </Box>
+
+                            {/* Preview of uploaded images */}
+                            {images.length > 0 && (
+                                <Box mt={2} display="flex" flexWrap="wrap" gap={2}>
+                                    {images.map((img, index) => (
+                                        <Box key={index} position="relative" display="inline-block">
+                                            <img
+                                                src={URL.createObjectURL(img)}
+                                                alt={`upload-${index}`}
+                                                width="100"
+                                                height="100"
+                                                style={{ borderRadius: '8px', objectFit: 'cover' }}
+                                            />
+                                            <IconButton
+                                                size="small"
+                                                sx={{
+                                                    position: 'absolute',
+                                                    top: '-5px',
+                                                    right: '-5px',
+                                                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                                }}
+                                                onClick={() => handleRemoveImage(index)}
+                                            >
+                                                <DeleteIcon sx={{ color: '#fff' }} />
+                                            </IconButton>
+                                        </Box>
+                                    ))}
+                                </Box>
+                            )}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleClose} color="primary">
+                                Cancel
+                            </Button>
+                            <Button onClick={handleSubmit} color="primary" variant="contained">
+                                Post
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+
+                    {/* Display posts */}
+                    <Box mt={3}>
+                        {posts.map((post) => (
+                            <PostComponent key={post._id} post={post} />
+                        ))}
+                    </Box>
+                </Box>
+            </Container>
+        </>
     );
 };
 

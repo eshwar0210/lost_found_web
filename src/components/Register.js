@@ -7,6 +7,7 @@ import { app } from '../firebase'; // Ensure you have initialized your Firebase 
 
 
 const Register = () => {
+    
     const navigate = useNavigate(); // Hook for navigation
     const [email, setEmail] = useState('');
     const [whatsapp, setWhatsapp] = useState('');

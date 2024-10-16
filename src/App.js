@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Container } from '@mui/material';
-import Home from './components/Home';
+import HomePage from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
 import Profile from './components/Profile';
@@ -23,7 +23,7 @@ function App() {
                     <Route path="/" element={isAuthenticated() ? <Navigate to="/home" /> : <Navigate to="/login" />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    <Route path="/home" element={<PrivateRoute element={<Home />} />} />
+                    <Route path="/home" element={<PrivateRoute element={<HomePage />} />} />
                     <Route path="/profile" element={<PrivateRoute element={<Profile />} />} />
                 </Routes>
             </Container>
