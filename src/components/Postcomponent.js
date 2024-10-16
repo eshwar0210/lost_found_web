@@ -6,18 +6,27 @@ import {
     CardContent,
     Avatar,
     Button,
+    TextField,
+    IconButton,
+    Collapse,
 } from '@mui/material';
 import Slider from 'react-slick';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp'; // Import WhatsApp Icon
-import EmailIcon from '@mui/icons-material/Email'; // Import Email Icon
-import { useMediaQuery } from '@mui/material'; // Import useMediaQuery for responsive design
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import EmailIcon from '@mui/icons-material/Email';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // For the expand/collapse button
+import { useMediaQuery } from '@mui/material';
 import config from '../config';
 
 const PostComponent = ({ post }) => {
     const [email, setEmail] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [profilePhoto, setProfilePhoto] = useState(null);
+    const [comments, setComments] = useState([]); // State for comments
+    const [newComment, setNewComment] = useState(''); // State for new comment input
+    const [showComments, setShowComments] = useState(false); // State to toggle comments visibility
+    const [commentLoading, setCommentLoading] = useState(false); // Loading state for comment submission
 
+    console.log(post);
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -27,12 +36,23 @@ const PostComponent = ({ post }) => {
                 setWhatsapp(data.whatsappNumber);
                 setEmail(data.email);
             } catch (error) {
-                console.error('Error fetching posts:', error);
+                console.error('Error fetching user:', error);
             }
         };
 
         fetchUser();
     }, [post.uid]);
+
+    const handleCommentSubmit = async () => {
+        if (newComment.trim() === '') return; // Prevent empty comments
+        setCommentLoading(true);
+
+        // Here you can integrate your backend API to save comments
+
+        setComments([...comments, newComment]); // Add new comment to the list
+        setNewComment(''); // Clear the input field
+        setCommentLoading(false);
+    };
 
     const settings = {
         dots: true,
@@ -44,16 +64,15 @@ const PostComponent = ({ post }) => {
 
     const postTypeStyles = {
         lost: {
-            backgroundColor: '#ffe5e5', // Light red background
-            color: '#d32f2f', // Red color for lost items
+            backgroundColor: '#ffe5e5',
+            color: '#d32f2f',
         },
         found: {
-            backgroundColor: '#e8f5e9', // Light green background
-            color: '#388e3c', // Green color for found items
+            backgroundColor: '#e8f5e9',
+            color: '#388e3c',
         },
     };
 
-    // Check if the screen is small (e.g., less than 600px)
     const isSmallScreen = useMediaQuery('(max-width:600px)');
 
     return (
@@ -66,8 +85,6 @@ const PostComponent = ({ post }) => {
 
             {/* Post Info */}
             <CardContent>
-
-                {/* Location and Item Type inline */}
                 <Box display="flex" justifyContent="space-between" mt={1}>
                     <Typography variant="body2" sx={{ color: postTypeStyles[post.postType].color }}>
                         Location: {post.location}
@@ -89,10 +106,10 @@ const PostComponent = ({ post }) => {
                                         src={url}
                                         alt={`Post image ${index + 1}`}
                                         style={{
-                                            width: '100%',               // Full width of the container
-                                            height: '200px',             // Fixed height
-                                            objectFit: 'contain',        // Contain to maintain aspect ratio
-                                            borderRadius: '8px',         // Rounded corners
+                                            width: '100%',
+                                            height: '200px',
+                                            objectFit: 'contain',
+                                            borderRadius: '8px',
                                         }}
                                     />
                                 </div>
@@ -104,42 +121,106 @@ const PostComponent = ({ post }) => {
 
             {/* Actions */}
             <Box display="flex" justifyContent="space-between" mt={2}>
-                <Button variant="outlined" onClick={() => console.log('Comment clicked')} fullWidth sx={{ marginRight: '10px', padding: '10px' }}>
-                    Comments
+                <Button
+                    variant="outlined"
+                    onClick={() => setShowComments(!showComments)}
+                    fullWidth
+                    sx={{
+                        marginRight: '10px', padding: '10px',
+                        fontSize: '0.775rem',
+                    }}
+                    endIcon={<ExpandMoreIcon />}
+                >
+                    {showComments ? 'Hide Comments' : 'Show Comments'}
                 </Button>
                 <Button
                     variant="contained"
-                    color="success" // Green color for WhatsApp
-                    startIcon={!isSmallScreen && <WhatsAppIcon />} // Show icon only on larger screens
+                    color="success"
+                    startIcon={!isSmallScreen && <WhatsAppIcon />}
                     onClick={() => window.open(`https://wa.me/${whatsapp}`, '_blank')}
                     fullWidth
                     sx={{
-                        marginRight: '10px', // Spacing between buttons
-                        padding: '10px', // Increased padding for better touch targets
+                        marginRight: '10px',
+                        padding: '10px',
                         '&:hover': {
-                            backgroundColor: '#66bb6a', // Darker green on hover
+                            backgroundColor: '#66bb6a',
                         },
                     }}
                 >
-                    {isSmallScreen ? <WhatsAppIcon /> : 'Message'} {/* Show icon only on small screens */}
+                    {isSmallScreen ? <WhatsAppIcon /> : 'Message'}
                 </Button>
                 <Button
-                    color="error" // Use the 'error' color to align with Gmail's red theme
+                    color="error"
                     variant="contained"
                     onClick={() => window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`, '_blank')}
-                    startIcon={!isSmallScreen && <EmailIcon />} // Show icon only on larger screens
+                    startIcon={!isSmallScreen && <EmailIcon />}
                     fullWidth
                     sx={{
-                        padding: '10px', // Increased padding for better touch targets
-                        backgroundColor: '#d50000', // Gmail red color
+                        padding: '10px',
+                        backgroundColor: '#d50000',
                         '&:hover': {
-                            backgroundColor: '#a00000', // Darker red on hover
+                            backgroundColor: '#a00000',
                         },
                     }}
                 >
-                    {isSmallScreen ? <EmailIcon /> : 'Gmail'} {/* Show icon only on small screens */}
+                    {isSmallScreen ? <EmailIcon /> : 'Gmail'}
                 </Button>
             </Box>
+
+            {/* Comments Section */}
+            <Collapse in={showComments}>
+                <Box mt={2} >
+                    {comments.length === 0 ? (
+                        <Typography variant="body2">No comments yet.</Typography>
+                    ) : (
+                        comments.map((comment, index) => (
+                            <Typography key={index} variant="body2" sx={{ marginBottom: 1 }}>
+                                {comment}
+                            </Typography>
+                        ))
+                    )}
+                </Box>
+                <Box
+                    display="flex"
+                    flexDirection={{ xs: 'column', sm: 'row' }} // Stack on small screens, row on larger
+                    alignItems="center"
+                    justifyContent="center"
+                    sx={{
+                        marginTop: 1,
+                        gap: { xs: 1, sm: 2 }, // Space between input and button
+                    }}
+                >
+                    <TextField
+                        variant="outlined"
+                        placeholder="Add a comment..."
+                        fullWidth
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        disabled={commentLoading}
+                        sx={{
+                            borderRadius: '20px', // Rounded corners for the input field
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '20px', // Ensuring consistent rounding
+                            },
+                        }}
+                    />
+                    {newComment.trim() && ( // Render button only if there's actual text
+                        <Button
+                            variant="contained"
+                            onClick={handleCommentSubmit}
+                            disabled={commentLoading}
+                            sx={{
+                                borderRadius: '20px', // Rounded corners for the button
+                                padding: '10px 20px', // Adjust padding as needed
+                                minWidth: '100px' // Minimum width for the button
+                            }}
+                        >
+                            {commentLoading ? 'Adding...' : 'Comment'}
+                        </Button>
+                    )}
+                </Box>
+
+            </Collapse>
         </Card>
     );
 };

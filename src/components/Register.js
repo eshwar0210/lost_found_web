@@ -10,6 +10,7 @@ const Register = () => {
     
     const navigate = useNavigate(); // Hook for navigation
     const [email, setEmail] = useState('');
+    const [name, setName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,6 +39,7 @@ const Register = () => {
             // Prepare user data for your server
             const userData = {
                 email,
+                name,
                 whatsappNumber: whatsapp,
                 password,
                 hostelName: hostel,
@@ -73,6 +75,7 @@ const Register = () => {
                 setEmail('');
                 setWhatsapp('');
                 setPassword('');
+                setName('');
                 setConfirmPassword('');
                 setHostel('');
                 setProfilePhoto(null);
@@ -120,6 +123,13 @@ const Register = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+            />
+            <TextField
+                label="Name"
+                type="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
             />
             <TextField
