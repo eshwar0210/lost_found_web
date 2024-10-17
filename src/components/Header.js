@@ -1,11 +1,35 @@
-import React, { useState } from 'react';
-import { Box, IconButton, Menu, MenuItem, Typography, Toolbar } from '@mui/material';
-import AccountCircle from '@mui/icons-material/AccountCircleOutlined';
+import React, { useState, useEffect } from 'react';
+import { Box, IconButton, Menu, MenuItem, Typography, Toolbar, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; 
 
 const Header = () => {
     const [anchorEl, setAnchorEl] = useState(null);
+    const [user, setUser] = useState('');
+    const [name,setName] = useState('');
+    const [profilePhoto,setProfilePhoto] = useState('');
     const navigate = useNavigate();
+
+    // Fetch user details by UID from localStorage
+    useEffect(() => {
+        const uid = localStorage.getItem('uid');
+        if (uid) {
+            // Replace the URL with your API endpoint to get user details by uid
+            axios.get(`${process.env.REACT_APP_BASE_URL}/auth/user/${uid}`)
+                .then((response) => {
+                    // console.log(response.data);
+                    const { name, profilePhotoUrl } = response.data;
+                    setName(name);
+                    setProfilePhoto(profilePhotoUrl);
+                    // Set the user's name in localStorage
+                    localStorage.setItem('name', name);
+                    localStorage.setItem('profile',profilePhotoUrl);
+                })
+                .catch((error) => {
+                    console.error('Error fetching user details:', error);
+                });
+        }
+    }, []);
 
     // Handle menu open
     const handleMenuOpen = (event) => {
@@ -21,6 +45,8 @@ const Header = () => {
     const handleLogout = () => {
         localStorage.removeItem('authToken');
         localStorage.removeItem('uid');
+        localStorage.removeItem('name');
+        localStorage.removeItem('profile');
         setAnchorEl(null);
         navigate('/login');
     };
@@ -30,6 +56,7 @@ const Header = () => {
         setAnchorEl(null);
         navigate('/profile');
     };
+
 
     return (
         <Box sx={{ width: '100%', mb: 2 }}>
@@ -47,9 +74,9 @@ const Header = () => {
                     onClick={() => navigate('/')}
                     sx={{
                         cursor: 'pointer',
-                        transition: 'color 0.3s', // Smooth transition for hover
+                        transition: 'color 0.3s',
                         '&:hover': {
-                            color: 'blue', // Change to the desired hover color
+                            color: 'blue',
                         },
                     }}
                 >
@@ -66,7 +93,11 @@ const Header = () => {
                     aria-haspopup="true"
                     color="inherit"
                 >
-                    <AccountCircle style={{ fontSize: 40 }} />
+                    {profilePhoto ? (
+                        <Avatar src={profilePhoto} alt={name} style={{ width: 40, height: 40 }} />
+                    ) : (
+                        <Avatar>{name.charAt(0)}</Avatar> // Fallback if profileImage is missing
+                    )}
                 </IconButton>
 
                 {/* Dropdown Menu for Profile and Logout */}

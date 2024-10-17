@@ -39,10 +39,12 @@ const Login = () => {
                 return; // Exit the function if the email is not verified
             }
 
+            // console.log(user);
+
             // Save user info or token to local storage for session management
             localStorage.setItem('authToken', user.accessToken);
             localStorage.setItem('uid', user.uid);
-
+            
             // Provide success feedback
             setSnackbarMessage('Login successful!');
             setSnackbarSeverity('success');

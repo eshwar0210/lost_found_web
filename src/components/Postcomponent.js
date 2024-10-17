@@ -7,19 +7,18 @@ import {
     Avatar,
     Button,
     TextField,
-    IconButton,
     Collapse,
 } from '@mui/material';
 import Slider from 'react-slick';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // For the expand/collapse button
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useMediaQuery } from '@mui/material';
 import config from '../config';
 
 const PostComponent = ({ post }) => {
     const [email, setEmail] = useState('');
-    const [name,setName] = useState('');
+    const [name, setName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [comments, setComments] = useState([]); // State for comments
@@ -27,7 +26,6 @@ const PostComponent = ({ post }) => {
     const [showComments, setShowComments] = useState(false); // State to toggle comments visibility
     const [commentLoading, setCommentLoading] = useState(false); // Loading state for comment submission
 
-    console.log(post);
     useEffect(() => {
         const fetchUser = async () => {
             try {
@@ -37,7 +35,6 @@ const PostComponent = ({ post }) => {
                 setWhatsapp(data.whatsappNumber);
                 setEmail(data.email);
                 setName(data.name);
-
             } catch (error) {
                 console.error('Error fetching user:', error);
             }
@@ -46,17 +43,55 @@ const PostComponent = ({ post }) => {
         fetchUser();
     }, [post.uid]);
 
+    useEffect(() => {
+        setComments(post.comments || []); // Initialize comments with post data
+    }, [post.comments]);
+
     const handleCommentSubmit = async () => {
-        if (newComment.trim() === '') return; // Prevent empty comments
+        if (newComment.trim() === '') return;
+    
         setCommentLoading(true);
-
-        // Here you can integrate your backend API to save comments
-
-        setComments([...comments, newComment]); // Add new comment to the list
+    
+        const userId = localStorage.getItem('uid');
+        const userName = localStorage.getItem('name');
+    
+        // Create the new comment object
+        const newCommentObj = {
+            userId,
+            userName,
+            comment: newComment,
+        };
+    
+        // Optimistically update the comments state
+        setComments((prevComments) => [...prevComments, newCommentObj]);
         setNewComment(''); // Clear the input field
-        setCommentLoading(false);
+    
+        try {
+            const response = await fetch(`${config.BASE_URL}/post/${post._id}/comment`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newCommentObj),
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to add comment');
+            }
+    
+            const updatedPost = await response.json();
+    
+            // If necessary, you can also synchronize with the backend comments here
+            // setComments(updatedPost.comments); // Uncomment if you want to sync with backend comments
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            // If the optimistic update fails, you may want to revert to the previous state
+            setComments((prevComments) => prevComments.slice(0, -1)); // Remove the last added comment on error
+        } finally {
+            setCommentLoading(false);
+        }
     };
-
+    
     const settings = {
         dots: true,
         infinite: post.imageUrls.length > 1,
@@ -77,7 +112,7 @@ const PostComponent = ({ post }) => {
     };
 
     const isSmallScreen = useMediaQuery('(max-width:600px)');
-    console.log(post.imageUrls);
+
     return (
         <Card sx={{ margin: '20px 0', padding: '20px', ...postTypeStyles[post.postType] }}>
             {/* User Info */}
@@ -100,7 +135,6 @@ const PostComponent = ({ post }) => {
                 <Typography variant="body1" mt={1}>{post.description}</Typography>
 
                 {/* Image Carousel */}
-               
                 {post.imageUrls && post.imageUrls.length > 0 && (
                     <Box mt={2}>
                         <Slider {...settings}>
@@ -129,10 +163,7 @@ const PostComponent = ({ post }) => {
                     variant="outlined"
                     onClick={() => setShowComments(!showComments)}
                     fullWidth
-                    sx={{
-                        marginRight: '10px', padding: '10px',
-                        fontSize: '0.775rem',
-                    }}
+                    sx={{ marginRight: '10px', padding: '10px', fontSize: '0.775rem' }}
                     endIcon={<ExpandMoreIcon />}
                 >
                     {showComments ? 'Hide Comments' : 'Show Comments'}
@@ -146,9 +177,7 @@ const PostComponent = ({ post }) => {
                     sx={{
                         marginRight: '10px',
                         padding: '10px',
-                        '&:hover': {
-                            backgroundColor: '#66bb6a',
-                        },
+                        '&:hover': { backgroundColor: '#66bb6a' },
                     }}
                 >
                     {isSmallScreen ? <WhatsAppIcon /> : 'Message'}
@@ -162,9 +191,7 @@ const PostComponent = ({ post }) => {
                     sx={{
                         padding: '10px',
                         backgroundColor: '#d50000',
-                        '&:hover': {
-                            backgroundColor: '#a00000',
-                        },
+                        '&:hover': { backgroundColor: '#a00000' },
                     }}
                 >
                     {isSmallScreen ? <EmailIcon /> : 'Gmail'}
@@ -173,20 +200,27 @@ const PostComponent = ({ post }) => {
 
             {/* Comments Section */}
             <Collapse in={showComments}>
-                <Box mt={2} >
-                    {comments.length === 0 ? (
+                <Box mt={2}>
+                    {(!comments || comments.length === 0) ? (
                         <Typography variant="body2">No comments yet.</Typography>
                     ) : (
                         comments.map((comment, index) => (
-                            <Typography key={index} variant="body2" sx={{ marginBottom: 1 }}>
-                                {comment}
-                            </Typography>
+                            <Box key={index} display="flex" mb={2}>
+                                <Typography variant="body2" fontWeight="bold" fontSize={15} mr={2}>
+                                    {comment.userName} :  
+                                </Typography>
+                                <Typography fontSize={15}>
+                                { comment.comment}
+                                </Typography>
+                               
+                            </Box>
                         ))
                     )}
                 </Box>
+
                 <Box
                     display="flex"
-                    flexDirection={{ xs: 'column', sm: 'row' }} // Stack on small screens, row on larger
+                    flexDirection={{ xs: 'column', sm: 'row' }}
                     alignItems="center"
                     justifyContent="center"
                     sx={{
@@ -208,22 +242,21 @@ const PostComponent = ({ post }) => {
                             },
                         }}
                     />
-                    {newComment.trim() && ( // Render button only if there's actual text
+                    {newComment.trim() && (
                         <Button
                             variant="contained"
                             onClick={handleCommentSubmit}
                             disabled={commentLoading}
                             sx={{
-                                borderRadius: '20px', // Rounded corners for the button
-                                padding: '10px 20px', // Adjust padding as needed
-                                minWidth: '100px' // Minimum width for the button
+                                borderRadius: '20px',
+                                padding: '10px 20px',
+                                minWidth: '100px',
                             }}
                         >
                             {commentLoading ? 'Adding...' : 'Comment'}
                         </Button>
                     )}
                 </Box>
-
             </Collapse>
         </Card>
     );

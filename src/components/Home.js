@@ -35,6 +35,7 @@ const Home = () => {
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [loading, setLoading] = useState(false); // Loading state
     const uid = localStorage.getItem('uid');
+    const profilePhoto = localStorage.getItem('profile');
 
     // Handle dialog open
     const handleClickOpen = () => setOpen(true);
@@ -127,7 +128,7 @@ const Home = () => {
                     >
                         <Avatar
                             alt="User"
-                            src="/static/images/avatar/1.jpg"
+                            src={profilePhoto}
                             sx={{ width: 56, height: 56, marginRight: 2 }}
                         />
                         <Box
