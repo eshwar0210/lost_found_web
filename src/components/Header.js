@@ -61,6 +61,10 @@ const Header = () => {
         navigate('/home');
     };
 
+    const handlemyprofileclick = () =>{
+        setAnchorEl(null);
+        navigate('/myprofile');
+    };
 
     return (
         <Box sx={{ width: '100%', mb: 2 }}>
@@ -120,7 +124,7 @@ const Header = () => {
                     }}
                 >
                     <MenuItem onClick={handlehomeclick}>Home </MenuItem>   
-                    <MenuItem>My Profile</MenuItem>
+                    <MenuItem onClick={handlemyprofileclick}>My Profile</MenuItem>
                     
                     <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
                     

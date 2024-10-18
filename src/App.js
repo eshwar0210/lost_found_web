@@ -6,9 +6,10 @@ import Register from './components/Register';
 import Login from './components/Login';
 import EditProfile from './components/EditProfile';
 import './App.css';
+import MyProfile from './components/myprofile';
 
 const isAuthenticated = () => {
-    return !!localStorage.getItem('authToken');  
+    return !!localStorage.getItem('authToken');
 };
 
 const PrivateRoute = ({ element: Component }) => {
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/home" element={<PrivateRoute element={<HomePage />} />} />
                     <Route path="/editprofile" element={<PrivateRoute element={<EditProfile />} />} />
+                    <Route path="/myprofile" element={<PrivateRoute element={<MyProfile />} />} />
                 </Routes>
             </Container>
         </Router>

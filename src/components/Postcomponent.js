@@ -8,6 +8,8 @@ import {
     Button,
     TextField,
     Collapse,
+    CircularProgress, // Added for loading state
+    Divider, // Added for separating comments section
 } from '@mui/material';
 import Slider from 'react-slick';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
@@ -21,10 +23,11 @@ const PostComponent = ({ post }) => {
     const [name, setName] = useState('');
     const [whatsapp, setWhatsapp] = useState('');
     const [profilePhoto, setProfilePhoto] = useState(null);
-    const [comments, setComments] = useState([]); // State for comments
-    const [newComment, setNewComment] = useState(''); // State for new comment input
-    const [showComments, setShowComments] = useState(false); // State to toggle comments visibility
-    const [commentLoading, setCommentLoading] = useState(false); // Loading state for comment submission
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState('');
+    const [showComments, setShowComments] = useState(false);
+    const [commentLoading, setCommentLoading] = useState(false);
+    const [loadingUser, setLoadingUser] = useState(true); // Loading state for user data
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -37,6 +40,8 @@ const PostComponent = ({ post }) => {
                 setName(data.name);
             } catch (error) {
                 console.error('Error fetching user:', error);
+            } finally {
+                setLoadingUser(false); // Set loading to false after fetching
             }
         };
 
@@ -44,28 +49,26 @@ const PostComponent = ({ post }) => {
     }, [post.uid]);
 
     useEffect(() => {
-        setComments(post.comments || []); // Initialize comments with post data
+        setComments(post.comments || []);
     }, [post.comments]);
 
     const handleCommentSubmit = async () => {
         if (newComment.trim() === '') return;
-    
+
         setCommentLoading(true);
-    
+
         const userId = localStorage.getItem('uid');
         const userName = localStorage.getItem('name');
-    
-        // Create the new comment object
+
         const newCommentObj = {
             userId,
             userName,
             comment: newComment,
         };
-    
-        // Optimistically update the comments state
+
         setComments((prevComments) => [...prevComments, newCommentObj]);
-        setNewComment(''); // Clear the input field
-    
+        setNewComment('');
+
         try {
             const response = await fetch(`${config.BASE_URL}/post/${post._id}/comment`, {
                 method: 'POST',
@@ -74,24 +77,18 @@ const PostComponent = ({ post }) => {
                 },
                 body: JSON.stringify(newCommentObj),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to add comment');
             }
-    
-            const updatedPost = await response.json();
-    
-            // If necessary, you can also synchronize with the backend comments here
-            // setComments(updatedPost.comments); // Uncomment if you want to sync with backend comments
         } catch (error) {
             console.error('Error adding comment:', error);
-            // If the optimistic update fails, you may want to revert to the previous state
-            setComments((prevComments) => prevComments.slice(0, -1)); // Remove the last added comment on error
+            setComments((prevComments) => prevComments.slice(0, -1)); // Revert optimistic update
         } finally {
             setCommentLoading(false);
         }
     };
-    
+
     const settings = {
         dots: true,
         infinite: post.imageUrls.length > 1,
@@ -116,10 +113,14 @@ const PostComponent = ({ post }) => {
     return (
         <Card sx={{ margin: '20px 0', padding: '20px', ...postTypeStyles[post.postType] }}>
             {/* User Info */}
-            <Box display="flex" alignItems="center" mb={2}>
-                <Avatar alt="User Avatar" src={profilePhoto} sx={{ width: 56, height: 56 }} />
-                <Typography variant="h6" ml={2}>{name}</Typography>
-            </Box>
+            {loadingUser ? ( // Show loading spinner while fetching user data
+                <CircularProgress />
+            ) : (
+                <Box display="flex" alignItems="center" mb={2}>
+                    <Avatar alt="User Avatar" src={profilePhoto} sx={{ width: 56, height: 56 }} />
+                    <Typography variant="h6" ml={2}>{name}</Typography>
+                </Box>
+            )}
 
             {/* Post Info */}
             <CardContent>
@@ -201,21 +202,16 @@ const PostComponent = ({ post }) => {
             {/* Comments Section */}
             <Collapse in={showComments}>
                 <Box mt={2}>
-                    {(!comments || comments.length === 0) ? (
-                        <Typography variant="body2">No comments yet.</Typography>
-                    ) : (
-                        comments.map((comment, index) => (
-                            <Box key={index} display="flex" mb={2}>
-                                <Typography variant="body2" fontWeight="bold" fontSize={15} mr={2}>
-                                    {comment.userName} :  
-                                </Typography>
-                                <Typography fontSize={15}>
-                                { comment.comment}
-                                </Typography>
-                               
-                            </Box>
-                        ))
-                    )}
+                    <Typography variant="body2">{comments.length > 0 ? `${comments.length} Comments` : 'No comments yet.'}</Typography>
+                    <Divider sx={{ marginY: 1 }} />
+                    {comments.map((comment, index) => (
+                        <Box key={index} display="flex" mb={2}>
+                            <Typography variant="body2" fontWeight="bold" fontSize={15} mr={2}>
+                                {comment.userName}:
+                            </Typography>
+                            <Typography fontSize={15}>{comment.comment}</Typography>
+                        </Box>
+                    ))}
                 </Box>
 
                 <Box
@@ -225,37 +221,25 @@ const PostComponent = ({ post }) => {
                     justifyContent="center"
                     sx={{
                         marginTop: 1,
-                        gap: { xs: 1, sm: 2 }, // Space between input and button
+                        gap: { xs: 1, sm: 2 },
                     }}
                 >
                     <TextField
                         variant="outlined"
-                        placeholder="Add a comment..."
+                        size="small"
                         fullWidth
+                        placeholder="Add a comment..."
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        disabled={commentLoading}
-                        sx={{
-                            borderRadius: '20px', // Rounded corners for the input field
-                            '& .MuiOutlinedInput-root': {
-                                borderRadius: '20px', // Ensuring consistent rounding
-                            },
-                        }}
                     />
-                    {newComment.trim() && (
-                        <Button
-                            variant="contained"
-                            onClick={handleCommentSubmit}
-                            disabled={commentLoading}
-                            sx={{
-                                borderRadius: '20px',
-                                padding: '10px 20px',
-                                minWidth: '100px',
-                            }}
-                        >
-                            {commentLoading ? 'Adding...' : 'Comment'}
-                        </Button>
-                    )}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleCommentSubmit}
+                        disabled={commentLoading}
+                    >
+                        {commentLoading ? <CircularProgress size={24} /> : 'Add'}
+                    </Button>
                 </Box>
             </Collapse>
         </Card>
