@@ -15,12 +15,14 @@ import {
     Select,
     MenuItem,
     TextField,
+    Divider,
 } from '@mui/material';
-import { Delete as DeleteIcon } from '@mui/icons-material';
+import { Delete as DeleteIcon, HorizontalRule } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getAuth, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import Header from './Header';
+import Footer from './footer';
 
 const EditProfile = () => {
     const [selectedImage, setSelectedImage] = useState(null);
@@ -140,7 +142,7 @@ const EditProfile = () => {
             }
         } catch (error) {
             // console.error('Error changing password:', error);
-            
+
             // Check for specific error codes
             if (error.code === 'auth/wrong-password') {
                 setSnackbarMessage('Invalid current password. Please try again.');
@@ -312,7 +314,7 @@ const EditProfile = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         fullWidth
-                        sx={{ mb: 2 }}
+                        sx={{ mb: 4 }}
                     />
                     <Button
                         variant="contained"
@@ -348,6 +350,17 @@ const EditProfile = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center'  , maxWidth : "xs"}}>
+
+                <Divider sx={{ width: '100%', borderColor: 'grey.500', borderBottomWidth: 2, my: 6 }} />
+
+
+            </Box>
+
+
+
+            <Footer />
         </Box>
     );
 };
