@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import config from '../config';
 import { getAuth, sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../firebase'; // Ensure you have initialized your Firebase app somewhere
-
+import Layout from './layout';
 
 const Register = () => {
-    
+
     const navigate = useNavigate(); // Hook for navigation
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
@@ -26,7 +26,7 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSnackbarOpen(false);
-    
+
         // Password confirmation check
         if (password !== confirmPassword) {
             setSnackbarMessage('Passwords do not match');
@@ -34,7 +34,7 @@ const Register = () => {
             setSnackbarOpen(true);
             return;
         }
-    
+
         try {
             // Prepare user data for your server
             const userData = {
@@ -44,33 +44,33 @@ const Register = () => {
                 password,
                 hostelName: hostel,
             };
-    
+
             // Create a FormData object to handle file uploads
             const formData = new FormData();
             formData.append('userData', JSON.stringify(userData));
             if (profilePhoto) {
                 formData.append('profilePhoto', profilePhoto);
             }
-    
+
             // Send registration request to backend
             const response = await fetch(`${config.BASE_URL}/auth/register`, {
                 method: 'POST',
                 body: formData,
             });
-    
+
             const data = await response.json();
-    
+
             if (response.ok) {
                 // After registration, send verification email
                 const auth = getAuth(app); // Initialize Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 await sendEmailVerification(user);
-    
+
                 setSnackbarMessage('Registration successful! A verification email has been sent.');
                 setSnackbarSeverity('success');
                 setSnackbarOpen(true);
-    
+
                 // Reset the form after successful registration
                 setEmail('');
                 setWhatsapp('');
@@ -90,7 +90,7 @@ const Register = () => {
             setSnackbarOpen(true);
         }
     };
-    
+
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
@@ -103,6 +103,8 @@ const Register = () => {
     };
 
     return (
+
+        <Layout>
         <Box
             component="form"
             onSubmit={handleSubmit}
@@ -222,7 +224,12 @@ const Register = () => {
                     {snackbarMessage}
                 </Alert>
             </Snackbar>
+            
         </Box>
+        </Layout>
+
+
+
     );
 };
 

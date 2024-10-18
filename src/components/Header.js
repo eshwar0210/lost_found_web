@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box, IconButton, Menu, MenuItem, Typography, Toolbar, Avatar } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
 
 const Header = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [user, setUser] = useState('');
-    const [name,setName] = useState('');
-    const [profilePhoto,setProfilePhoto] = useState('');
+    const [name, setName] = useState('');
+    const [profilePhoto, setProfilePhoto] = useState('');
     const navigate = useNavigate();
 
     // Fetch user details by UID from localStorage
@@ -23,7 +23,7 @@ const Header = () => {
                     setProfilePhoto(profilePhotoUrl);
                     // Set the user's name in localStorage
                     localStorage.setItem('name', name);
-                    localStorage.setItem('profile',profilePhotoUrl);
+                    localStorage.setItem('profile', profilePhotoUrl);
                 })
                 .catch((error) => {
                     console.error('Error fetching user details:', error);
@@ -54,7 +54,11 @@ const Header = () => {
     // Handle Edit Profile
     const handleEditProfile = () => {
         setAnchorEl(null);
-        navigate('/profile');
+        navigate('/editprofile');
+    };
+    const handlehomeclick = () => {
+        setAnchorEl(null);
+        navigate('/home');
     };
 
 
@@ -107,17 +111,22 @@ const Header = () => {
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                     anchorOrigin={{
-                        vertical: 'top',
+                        vertical: 'bottom', // Aligns the menu below the avatar
                         horizontal: 'right',
                     }}
                     transformOrigin={{
-                        vertical: 'top',
+                        vertical: 'top', // Makes the menu dropdown appear from the top of its anchor
                         horizontal: 'right',
                     }}
                 >
+                    <MenuItem onClick={handlehomeclick}>Home </MenuItem>   
+                    <MenuItem>My Profile</MenuItem>
+                    
                     <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
+                    
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </Menu>
+
             </Toolbar>
         </Box>
     );

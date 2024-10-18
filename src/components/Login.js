@@ -3,6 +3,7 @@ import { Container, TextField, Button, Typography, Box, Link, Snackbar, Alert, D
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
+import Footer from './footer';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -166,6 +167,7 @@ const Login = () => {
                     </Alert>
                 </Snackbar>
             </Box>
+            <Footer />
         </Container>
     );
 };

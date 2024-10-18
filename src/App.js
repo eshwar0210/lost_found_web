@@ -4,7 +4,7 @@ import { Container } from '@mui/material';
 import HomePage from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
-import Profile from './components/Profile';
+import EditProfile from './components/EditProfile';
 import './App.css';
 
 const isAuthenticated = () => {
@@ -24,7 +24,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/home" element={<PrivateRoute element={<HomePage />} />} />
-                    <Route path="/profile" element={<PrivateRoute element={<Profile />} />} />
+                    <Route path="/editprofile" element={<PrivateRoute element={<EditProfile />} />} />
                 </Routes>
             </Container>
         </Router>
