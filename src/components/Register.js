@@ -118,7 +118,7 @@ const Register = () => {
             }}
             mb={{ xs: 4, sm: 6 }}
         >
-            <Typography variant="h4" component="h1" align="center">Register</Typography>
+            <Typography variant="h4" component="h1" align="center">Join the Community</Typography>
 
             <TextField
                 label="Email"

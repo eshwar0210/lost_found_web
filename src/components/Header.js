@@ -124,7 +124,7 @@ const Header = () => {
                     }}
                 >
                     <MenuItem onClick={handlehomeclick}>Home </MenuItem>   
-                    <MenuItem onClick={handlemyprofileclick}>My Profile</MenuItem>
+                    <MenuItem onClick={handlemyprofileclick}>My Posts</MenuItem>
                     
                     <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
                     
