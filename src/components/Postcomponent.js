@@ -223,15 +223,15 @@ const PostComponent = ({ post }) => {
             </CardContent>
 
             <Box display="flex" justifyContent="space-between" mt={2}>
-                <Button
-                    variant="outlined"
-                    onClick={() => setShowComments(!showComments)}
-                    fullWidth
-                    sx={{ marginRight: '10px', padding: '10px', fontSize: '0.775rem' }}
-                    endIcon={<ExpandMoreIcon />}
-                >
-                    {showComments ? 'Hide Comments' : 'Show Comments'}
-                </Button>
+            <Button
+            variant="outlined"
+            onClick={() => setShowComments(!showComments)}
+            fullWidth
+            sx={{ marginRight: '10px', padding: '10px', fontSize: '0.775rem' }}
+           
+        >
+            {showComments ? (isSmallScreen ? '💬' : 'Hide Comments') : (isSmallScreen ? '💬' : 'Show Comments')}
+        </Button>
                 <Button
                     variant="contained"
                     color="success"
