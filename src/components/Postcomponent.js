@@ -242,7 +242,7 @@ const PostComponent = ({ post }) => {
                     variant="contained"
                     color="success"
                     startIcon={!isSmallScreen && <WhatsAppIcon />}
-                    onClick={() => window.open(`https://wa.me/${whatsapp}`, '_blank')}
+                    onClick={() => window.open(`https://wa.me/91${whatsapp}`, '_blank')}
                     fullWidth
                     sx={{
                         marginRight: '10px',
