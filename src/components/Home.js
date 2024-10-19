@@ -21,7 +21,6 @@ import MuiAlert from '@mui/material/Alert';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Header from './Header';
-import config from '../config';
 import PostComponent from './Postcomponent'; // Import PostComponent
 
 const Home = () => {
@@ -52,7 +51,7 @@ const Home = () => {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await fetch(`${config.BASE_URL}/post/`);
+                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/`);
                 const data = await response.json();
                 setPosts(data);
             } catch (error) {
@@ -76,7 +75,7 @@ const Home = () => {
         images.forEach((image) => formData.append('images', image));
 
         try {
-            const response = await fetch(`${config.BASE_URL}/post/`, {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/`, {
                 method: 'POST',
                 body: formData,
             });

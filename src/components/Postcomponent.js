@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -11,15 +12,16 @@ import {
     CircularProgress,
     Divider,
     IconButton,
+
 } from '@mui/material';
 import Slider from 'react-slick';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EmailIcon from '@mui/icons-material/Email';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useMediaQuery } from '@mui/material';
-import config from '../config';
+
+
 
 const PostComponent = ({ post }) => {
     const [email, setEmail] = useState('');
@@ -37,7 +39,7 @@ const PostComponent = ({ post }) => {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const response = await fetch(`${config.BASE_URL}/auth/user/${post.uid}`);
+                const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/user/${post.uid}`);
                 const data = await response.json();
                 setProfilePhoto(data.profilePhotoUrl);
                 setWhatsapp(data.whatsappNumber);
@@ -75,7 +77,7 @@ const PostComponent = ({ post }) => {
         setNewComment('');
 
         try {
-            const response = await fetch(`${config.BASE_URL}/post/${post._id}/comment`, {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/${post._id}/comment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -108,7 +110,7 @@ const PostComponent = ({ post }) => {
         // console.log(commentId);
 
         try {
-            const response = await fetch(`${config.BASE_URL}/post/${post._id}/comment/${commentId}`, {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/${post._id}/comment/${commentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,7 +141,7 @@ const PostComponent = ({ post }) => {
         setCommentLoading(true);
 
         try {
-            const response = await fetch(`${config.BASE_URL}/post/${post._id}/comment/${commentId}`, {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/post/${post._id}/comment/${commentId}`, {
                 method: 'DELETE',
             });
 
@@ -177,14 +179,18 @@ const PostComponent = ({ post }) => {
 
     const isSmallScreen = useMediaQuery('(max-width:600px)');
 
+    // console.log(post);
     return (
+
         <Card sx={{ margin: '20px 0', padding: '20px', ...postTypeStyles[post.postType] }}>
             {loadingUser ? (
                 <CircularProgress />
             ) : (
                 <Box display="flex" alignItems="center" mb={2}>
                     <Avatar alt="User Avatar" src={profilePhoto} sx={{ width: 56, height: 56 }} />
-                    <Typography variant="h6" ml={2}>{name}</Typography>
+                    <Typography variant="h6" ml={2} component={Link} to={`/profile/${post.uid}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        {name}
+                    </Typography>
                 </Box>
             )}
 
@@ -223,15 +229,15 @@ const PostComponent = ({ post }) => {
             </CardContent>
 
             <Box display="flex" justifyContent="space-between" mt={2}>
-            <Button
-            variant="outlined"
-            onClick={() => setShowComments(!showComments)}
-            fullWidth
-            sx={{ marginRight: '10px', padding: '10px', fontSize: '0.775rem' }}
-           
-        >
-            {showComments ? (isSmallScreen ? '💬' : 'Hide Comments') : (isSmallScreen ? '💬' : 'Show Comments')}
-        </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => setShowComments(!showComments)}
+                    fullWidth
+                    sx={{ marginRight: '10px', padding: '10px', fontSize: '0.775rem' }}
+
+                >
+                    {showComments ? (isSmallScreen ? '💬' : 'Hide Comments') : (isSmallScreen ? '💬' : 'Show Comments')}
+                </Button>
                 <Button
                     variant="contained"
                     color="success"
@@ -268,16 +274,16 @@ const PostComponent = ({ post }) => {
                     <Divider sx={{ marginY: 1 }} />
                     {comments.map((comment, index) => (
                         <Box key={index} display="flex" mb={2} alignItems="center">
-                            <Typography variant="body2" fontWeight="bold" fontSize={15} mr={2}>
-                                {comment.userName}:
+                            <Typography variant="body2" fontWeight="bold" fontSize={15} mr={2} component={Link} to={`/profile/${comment.userId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                {comment.userName } :
                             </Typography>
 
                             {editingCommentId === comment._id ? (
-                                <Box 
-                                    sx={{ 
-                                        display: 'flex', 
+                                <Box
+                                    sx={{
+                                        display: 'flex',
                                         flexDirection: { xs: 'column', sm: 'row' },  // Stack on small screens
-                                        alignItems: { xs: 'stretch', sm: 'center' }, 
+                                        alignItems: { xs: 'stretch', sm: 'center' },
                                         gap: 1  // Add space between elements
                                     }}
                                 >
@@ -293,7 +299,7 @@ const PostComponent = ({ post }) => {
                                         variant="contained"
                                         color="primary"
                                         onClick={() => handleSaveEditedComment(comment._id)}
-                                        sx={{ 
+                                        sx={{
                                             height: '35px',  // Slightly larger for touch-friendly
                                             mt: { xs: '8px', sm: 0 }  // Add margin-top on small screens for spacing
                                         }}
@@ -302,9 +308,9 @@ const PostComponent = ({ post }) => {
                                     </Button>
                                     <IconButton
                                         onClick={() => setEditingCommentId(null)}
-                                        sx={{ 
-                                            color: 'gray', 
-                                            fontSize: '18px', 
+                                        sx={{
+                                            color: 'gray',
+                                            fontSize: '18px',
                                             mt: { xs: '8px', sm: 0 }  // Add margin-top for small screens
                                         }}
                                     >
@@ -312,12 +318,12 @@ const PostComponent = ({ post }) => {
                                     </IconButton>
                                 </Box>
                             ) : (
-                                <Box 
-                                    sx={{ 
-                                        display: 'flex', 
-                                        flexDirection: { xs: 'column', sm: 'row' }, 
-                                        alignItems: { xs: 'flex-start', sm: 'center' }, 
-                                        gap: 1 
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        flexDirection: { xs: 'column', sm: 'row' },
+                                        alignItems: { xs: 'flex-start', sm: 'center' },
+                                        gap: 1
                                     }}
                                 >
                                     <Typography variant="body2" sx={{ flexGrow: 1 }}>
@@ -325,13 +331,13 @@ const PostComponent = ({ post }) => {
                                     </Typography>
                                     {comment.userId === localStorage.getItem('uid') && (
                                         <>
-                                            <IconButton 
+                                            <IconButton
                                                 onClick={() => handleEditComment(comment._id, comment.comment)}
                                                 sx={{ p: 0.5 }}  // Smaller padding for a more compact look
                                             >
                                                 <EditIcon sx={{ fontSize: 15, color: '#4caf50' }} />
                                             </IconButton>
-                                            <IconButton 
+                                            <IconButton
                                                 onClick={() => handleDeleteComment(comment._id)}
                                                 sx={{ p: 0.5 }}
                                             >
@@ -341,8 +347,8 @@ const PostComponent = ({ post }) => {
                                     )}
                                 </Box>
                             )}
-                            
-                            
+
+
                         </Box>
                     ))}
                 </Box>

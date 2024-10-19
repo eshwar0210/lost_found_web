@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Typography, Box, MenuItem, Link, Snackbar, Alert } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import config from '../config';
 import { getAuth, sendEmailVerification, signInWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../firebase'; // Ensure you have initialized your Firebase app somewhere
 import Layout from './layout';
@@ -53,7 +52,7 @@ const Register = () => {
             }
 
             // Send registration request to backend
-            const response = await fetch(`${config.BASE_URL}/auth/register`, {
+            const response = await fetch(`${process.env.REACT_APP_BASE_URL}/auth/register`, {
                 method: 'POST',
                 body: formData,
             });
