@@ -112,6 +112,11 @@ const Header = () => {
 
                 {/* Account Circle Icon for Profile/Logout */}
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
+
+                     <Typography sx={{ marginRight: 1 }}>
+                            {name}
+                        </Typography>
+
                     {/* Info Button with Decoration */}
                     <IconButton
                         onClick={handleInfoDialogOpen}
@@ -165,6 +170,8 @@ const Header = () => {
                     <MenuItem onClick={handleEditProfile}>Edit Profile</MenuItem>
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </Menu>
+
+
             </Toolbar>
 
             {/* Info Dialog for Rules and Regulations */}
