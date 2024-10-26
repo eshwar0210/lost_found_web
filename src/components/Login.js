@@ -41,6 +41,7 @@ const Login = () => {
             }
 
             // console.log(user);
+            
 
             // Save user info or token to local storage for session management
             localStorage.setItem('authToken', user.accessToken);

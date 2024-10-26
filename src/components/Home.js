@@ -23,6 +23,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import Header from './Header';
 import PostComponent from './Postcomponent'; // Import PostComponent
 
+
+
+
 const Home = () => {
     const [open, setOpen] = useState(false); // Dialog open/close state
     const [location, setLocation] = useState('');

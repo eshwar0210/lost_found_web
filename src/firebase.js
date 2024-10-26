@@ -24,5 +24,5 @@ const app = initializeApp(firebaseConfig);
 // Export Firebase services
 const auth = getAuth(app);
 const storage = getStorage(app);
-
+// console.log(auth.currentUser);
 export { auth, storage,app };
