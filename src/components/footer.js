@@ -18,9 +18,12 @@ const Footer = () => {
                 marginRight: 'auto', // Center horizontally
             }}
         >
-            <Typography variant="body2" color="text.secondary" sx={{ marginBottom: '8px' }}>
-                Designed with ❤️ by Eshwar
-            </Typography>
+           {
+
+            // <Typography variant="body2" color="text.secondary" sx={{ marginBottom: '8px' }}>
+            //     Designed with ❤️ by Eshwar
+            // </Typography>
+           }
             <Typography variant="body2" color="text.secondary">
                 {'© '}
                 <Link color="inherit" href="https://lost-found-6lys.onrender.com/">
